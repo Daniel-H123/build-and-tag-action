@@ -1,3 +1,4 @@
+import { describe, it, beforeEach, expect } from '@jest/globals'
 import path from 'path'
 import readFile from '../src/lib/read-file'
 
@@ -10,7 +11,7 @@ describe('read-file', () => {
   })
 
   it('throws if the file does not exist', async () => {
-    await expect(readFile(baseDir, 'nope')).rejects.toThrowError(
+    await expect(readFile(baseDir, 'nope')).rejects.toThrow(
       'nope does not exist.'
     )
   })

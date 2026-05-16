@@ -1,3 +1,4 @@
+import { describe, it, beforeEach, expect } from '@jest/globals'
 import getTagName from '../src/lib/get-tag-name'
 import { generateToolkit } from './helpers'
 import { Toolkit } from 'actions-toolkit'
@@ -23,7 +24,7 @@ describe('update-tag', () => {
 
   it('gets the tag from the release payload', () => {
     tools.context.event = 'pizza'
-    expect(() => getTagName(tools)).toThrowError(
+    expect(() => getTagName(tools)).toThrow(
       'No tag_name was found or provided!'
     )
   })
