@@ -1,31 +1,33 @@
-import { Toolkit } from 'actions-toolkit'
+import { context, getOctokit } from "@actions/github";
+import type { ActionConfig } from "../index.js"
 
 export default async function createOrUpdateRef(
-  tools: Toolkit,
+  config: ActionConfig,
   sha: string,
   tagName: string
 ) {
   const refName = `tags/v${tagName}`
-  tools.log.info(`Updating major version tag ${refName}`)
-  const { data: matchingRefs } = await tools.github.git.listMatchingRefs({
-    ...tools.context.repo,
+  const octokit = getOctokit(config.GITHUB_TOKEN);
+  octokit.log.info(`Updating major version tag ${refName}`)
+  const { data: matchingRefs } = await octokit.rest.git.listMatchingRefs({
+    ...context.repo,
     ref: refName
   })
 
-  const matchingRef = matchingRefs.find((refObj) => {
+  const matchingRef = matchingRefs.find((refObj: { ref: string }) => {
     return refObj.ref.endsWith(refName)
   })
 
   if (matchingRef !== undefined) {
-    await tools.github.git.updateRef({
-      ...tools.context.repo,
+    await octokit.rest.git.updateRef({
+      ...context.repo,
       force: true,
       ref: refName,
       sha
     })
   } else {
-    await tools.github.git.createRef({
-      ...tools.context.repo,
+    await octokit.rest.git.createRef({
+      ...context.repo,
       ref: `refs/${refName}`,
       sha
     })

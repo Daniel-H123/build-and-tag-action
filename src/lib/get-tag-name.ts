@@ -1,12 +1,21 @@
-import { Toolkit } from 'actions-toolkit'
+import { context } from "@actions/github"
+import type { ActionConfig } from "../index.js"
 
-export default function getTagName(tools: Toolkit): string {
-  if (tools.inputs.tag_name) {
-    return tools.inputs.tag_name
+/**
+ * Get the tag name to update. 
+ * This can come from either the action input, or from the release event payload.
+ * 
+ * @param config 
+ * @returns The tag name to update
+ * @throws If no tag name is found in the config or the event payload
+ */
+export default function getTagName(config: ActionConfig): string {
+  if (config.TAG_NAME) {
+    return config.TAG_NAME
   }
 
-  if (tools.context.event === 'release') {
-    return tools.context.payload.release.tag_name
+  if (context.eventName === 'release') {
+    return context.payload.release.tag_name
   }
 
   throw new Error('No tag_name was found or provided!')
