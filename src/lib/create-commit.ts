@@ -34,7 +34,9 @@ export default async function createCommit(octokit: Octokit) {
   if (!actionFileContent) {
     actionFileContent = await addFileToTree(treeEntries, 'action.yaml')
     if (!actionFileContent) {
-      throw new Error('Neither action.yml nor action.yaml found in the repository.')
+      throw new Error(
+        'Neither action.yml nor action.yaml found in the repository.'
+      )
     }
   }
 
@@ -48,7 +50,9 @@ export default async function createCommit(octokit: Octokit) {
       throw new Error('Property "main" does not exist in package.json.')
     }
   } catch (err) {
-    throw new Error(`Failed to read package.json or extract main property: ${err}`)
+    throw new Error(
+      `Failed to read package.json or extract main property: ${err}`
+    )
   }
 
   // Add package.json if it exists
