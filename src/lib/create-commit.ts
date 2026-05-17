@@ -1,21 +1,21 @@
 import readFile from './read-file.js'
-import { context } from "@actions/github";
-import type { Octokit } from "../main.js";
-import { info, setFailed } from '@actions/core';
+import { context } from '@actions/github'
+import type { Octokit } from '../main.js'
+import { info, setFailed } from '@actions/core'
 
 export default async function createCommit(octokit: Octokit) {
   let main = ''
 
-  const workspace = process.env.GITHUB_WORKSPACE;
+  const workspace = process.env.GITHUB_WORKSPACE
 
   if (!workspace) {
     throw new Error('GITHUB_WORKSPACE environment variable is not set.')
   }
 
   try {
-    main = JSON.parse(await readFile(workspace, "package.json")).main as string;
+    main = JSON.parse(await readFile(workspace, 'package.json')).main as string
   } catch (err) {
-    setFailed(`Failed to read package.json: ${err}`);
+    setFailed(`Failed to read package.json: ${err}`)
   }
 
   if (!main) {

@@ -1,6 +1,9 @@
-import { describe, it, beforeEach, expect } from '@jest/globals'
+import { describe, it, expect } from 'vitest'
 import path from 'path'
-import readFile from '../src/lib/read-file'
+import { fileURLToPath } from 'url'
+import readFile from '../src/lib/read-file.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 describe('read-file', () => {
   const baseDir = path.join(__dirname, 'fixtures')

@@ -1,115 +1,224 @@
-import { describe, it, beforeEach, expect } from '@jest/globals'
-import nock from 'nock'
-import { Toolkit } from 'actions-toolkit'
-import buildAndTagAction from '../src/lib'
-import { generateToolkit } from './helpers'
+import { describe, it, beforeEach, expect, vi } from 'vitest'
+import main from '../src/main.js'
+import { generateConfig } from './helpers.js'
+import type { ActionConfig } from '../src/index.js'
+import * as github from '@actions/github'
+
+vi.mock('@actions/github', async () => {
+  const actual = await vi.importActual('@actions/github')
+  return {
+    ...actual,
+    context: {
+      eventName: 'release',
+      repo: { owner: 'JasonEtco', repo: 'test' },
+      sha: '123abc',
+      payload: {
+        release: {
+          tag_name: 'v1.0.0',
+          draft: false,
+          prerelease: false
+        }
+      }
+    },
+    getOctokit: vi.fn((token) => ({
+      rest: {
+        git: {
+          createTree: vi.fn(async () => ({ data: { sha: 'tree123' } })),
+          createCommit: vi.fn(async () => ({ data: { sha: 'commit123' } })),
+          updateRef: vi.fn(async () => ({})),
+          createRef: vi.fn(async () => ({})),
+          listMatchingRefs: vi.fn(async () => ({ data: [] }))
+        }
+      }
+    }))
+  }
+})
 
 describe('build-and-tag-action', () => {
-  let tools: Toolkit
+  let config: ActionConfig
 
   beforeEach(() => {
-    nock.cleanAll()
-    tools = generateToolkit()
-    delete process.env.INPUT_SETUP
-    delete process.env.INPUT_TAG_NAME
+    vi.clearAllMocks()
+    config = generateConfig()
+    process.env.GITHUB_WORKSPACE = 'tests/fixtures/workspace'
   })
 
   it('updates the ref and updates an existing major ref', async () => {
-    nock('https://api.github.com')
-      .patch('/repos/JasonEtco/test/git/refs/tags%2Fv1.0.0')
-      .reply(200)
-      .patch('/repos/JasonEtco/test/git/refs/tags%2Fv1')
-      .reply(200)
-      .patch('/repos/JasonEtco/test/git/refs/tags%2Fv1.0')
-      .reply(200)
-      .get('/repos/JasonEtco/test/git/matching-refs/tags%2Fv1')
-      .reply(200, [{ ref: 'tags/v1' }])
-      .get('/repos/JasonEtco/test/git/matching-refs/tags%2Fv1.0')
-      .reply(200, [{ ref: 'tags/v1.0' }])
-      .post('/repos/JasonEtco/test/git/commits')
-      .reply(200, { commit: { sha: '123abc' } })
-      .post('/repos/JasonEtco/test/git/trees')
-      .reply(200)
+    const mockGetOctokit = vi.mocked(github.getOctokit)
+    const mockGithubContext = vi.mocked(github.context)
+    const mockOctokit = {
+      rest: {
+        git: {
+          createTree: vi.fn(async () => ({ data: { sha: 'tree123' } })),
+          createCommit: vi.fn(async () => ({ data: { sha: 'commit123' } })),
+          updateRef: vi.fn(async () => ({})),
+          createRef: vi.fn(async () => ({})),
+          listMatchingRefs: vi.fn(async () => ({
+            data: [{ ref: 'tags/v1' }, { ref: 'tags/v1.0' }]
+          }))
+        }
+      }
+    }
+    mockGetOctokit.mockReturnValue(mockOctokit as any)
+    Object.assign(mockGithubContext, {
+      eventName: 'release',
+      repo: { owner: 'JasonEtco', repo: 'test' },
+      sha: '123abc',
+      payload: {
+        release: {
+          tag_name: 'v1.0.0',
+          draft: false,
+          prerelease: false
+        }
+      }
+    })
 
-    await buildAndTagAction(tools)
+    await main(config)
 
-    expect(nock.isDone()).toBe(true)
+    expect(mockOctokit.rest.git.createTree).toHaveBeenCalled()
+    expect(mockOctokit.rest.git.createCommit).toHaveBeenCalled()
+    expect(mockOctokit.rest.git.updateRef).toHaveBeenCalled()
   })
 
   it('updates the ref and creates a new major & minor ref', async () => {
-    nock('https://api.github.com')
-      .patch('/repos/JasonEtco/test/git/refs/tags%2Fv1.0.0')
-      .reply(200)
-      .post('/repos/JasonEtco/test/git/refs')
-      .times(2)
-      .reply(200)
-      .get('/repos/JasonEtco/test/git/matching-refs/tags%2Fv1')
-      .reply(200, [])
-      .get('/repos/JasonEtco/test/git/matching-refs/tags%2Fv1.0')
-      .reply(200, [])
-      .post('/repos/JasonEtco/test/git/commits')
-      .reply(200, { commit: { sha: '123abc' } })
-      .post('/repos/JasonEtco/test/git/trees')
-      .reply(200)
+    const mockGetOctokit = vi.mocked(github.getOctokit)
+    const mockGithubContext = vi.mocked(github.context)
+    const mockOctokit = {
+      rest: {
+        git: {
+          createTree: vi.fn(async () => ({ data: { sha: 'tree123' } })),
+          createCommit: vi.fn(async () => ({ data: { sha: 'commit123' } })),
+          updateRef: vi.fn(async () => ({})),
+          createRef: vi.fn(async () => ({})),
+          listMatchingRefs: vi.fn(async () => ({ data: [] }))
+        }
+      }
+    }
+    mockGetOctokit.mockReturnValue(mockOctokit as any)
+    Object.assign(mockGithubContext, {
+      eventName: 'release',
+      repo: { owner: 'JasonEtco', repo: 'test' },
+      sha: '123abc',
+      payload: {
+        release: {
+          tag_name: 'v1.0.0',
+          draft: false,
+          prerelease: false
+        }
+      }
+    })
 
-    await buildAndTagAction(tools)
+    await main(config)
 
-    expect(nock.isDone()).toBe(true)
+    expect(mockOctokit.rest.git.createTree).toHaveBeenCalled()
+    expect(mockOctokit.rest.git.createCommit).toHaveBeenCalled()
+    expect(mockOctokit.rest.git.createRef).toHaveBeenCalledTimes(2)
   })
 
   it('does not update the major ref if the release is a draft', async () => {
-    nock('https://api.github.com')
-      .patch('/repos/JasonEtco/test/git/refs/tags%2Fv1.0.0')
-      .reply(200)
-      .post('/repos/JasonEtco/test/git/commits')
-      .reply(200, { commit: { sha: '123abc' } })
-      .post('/repos/JasonEtco/test/git/trees')
-      .reply(200)
+    const mockGetOctokit = vi.mocked(github.getOctokit)
+    const mockGithubContext = vi.mocked(github.context)
+    const mockOctokit = {
+      rest: {
+        git: {
+          createTree: vi.fn(async () => ({ data: { sha: 'tree123' } })),
+          createCommit: vi.fn(async () => ({ data: { sha: 'commit123' } })),
+          updateRef: vi.fn(async () => ({})),
+          createRef: vi.fn(async () => ({})),
+          listMatchingRefs: vi.fn(async () => ({ data: [] }))
+        }
+      }
+    }
+    mockGetOctokit.mockReturnValue(mockOctokit as any)
+    Object.assign(mockGithubContext, {
+      eventName: 'release',
+      repo: { owner: 'JasonEtco', repo: 'test' },
+      sha: '123abc',
+      payload: {
+        release: {
+          tag_name: 'v1.0.0',
+          draft: true,
+          prerelease: false
+        }
+      }
+    })
 
-    tools.context.payload.release.draft = true
+    await main(config)
 
-    await buildAndTagAction(tools)
-
-    expect(nock.isDone()).toBe(true)
+    expect(mockOctokit.rest.git.createTree).toHaveBeenCalled()
+    expect(mockOctokit.rest.git.createCommit).toHaveBeenCalled()
+    expect(mockOctokit.rest.git.createRef).not.toHaveBeenCalled()
   })
 
   it('does not update the major ref if the release is a prerelease', async () => {
-    nock('https://api.github.com')
-      .patch('/repos/JasonEtco/test/git/refs/tags%2Fv1.0.0')
-      .reply(200)
-      .post('/repos/JasonEtco/test/git/commits')
-      .reply(200, { commit: { sha: '123abc' } })
-      .post('/repos/JasonEtco/test/git/trees')
-      .reply(200)
+    const mockGetOctokit = vi.mocked(github.getOctokit)
+    const mockGithubContext = vi.mocked(github.context)
+    const mockOctokit = {
+      rest: {
+        git: {
+          createTree: vi.fn(async () => ({ data: { sha: 'tree123' } })),
+          createCommit: vi.fn(async () => ({ data: { sha: 'commit123' } })),
+          updateRef: vi.fn(async () => ({})),
+          createRef: vi.fn(async () => ({})),
+          listMatchingRefs: vi.fn(async () => ({ data: [] }))
+        }
+      }
+    }
+    mockGetOctokit.mockReturnValue(mockOctokit as any)
+    Object.assign(mockGithubContext, {
+      eventName: 'release',
+      repo: { owner: 'JasonEtco', repo: 'test' },
+      sha: '123abc',
+      payload: {
+        release: {
+          tag_name: 'v1.0.0',
+          draft: false,
+          prerelease: true
+        }
+      }
+    })
 
-    tools.context.payload.release.prerelease = true
+    await main(config)
 
-    await buildAndTagAction(tools)
-
-    expect(nock.isDone()).toBe(true)
+    expect(mockOctokit.rest.git.createTree).toHaveBeenCalled()
+    expect(mockOctokit.rest.git.createCommit).toHaveBeenCalled()
+    expect(mockOctokit.rest.git.createRef).not.toHaveBeenCalled()
   })
 
   it('updates the ref and creates a new major ref for an event other than `release`', async () => {
-    nock('https://api.github.com')
-      .patch('/repos/JasonEtco/test/git/refs/tags%2Fv2.0.0')
-      .reply(200)
-      .post('/repos/JasonEtco/test/git/refs')
-      .times(2)
-      .reply(200)
-      .get('/repos/JasonEtco/test/git/matching-refs/tags%2Fv2')
-      .reply(200, [])
-      .get('/repos/JasonEtco/test/git/matching-refs/tags%2Fv2.0')
-      .reply(200, [])
-      .post('/repos/JasonEtco/test/git/commits')
-      .reply(200, { commit: { sha: '123abc' } })
-      .post('/repos/JasonEtco/test/git/trees')
-      .reply(200)
+    const mockGetOctokit = vi.mocked(github.getOctokit)
+    const mockGithubContext = vi.mocked(github.context)
+    const mockOctokit = {
+      rest: {
+        git: {
+          createTree: vi.fn(async () => ({ data: { sha: 'tree123' } })),
+          createCommit: vi.fn(async () => ({ data: { sha: 'commit123' } })),
+          updateRef: vi.fn(async () => ({})),
+          createRef: vi.fn(async () => ({})),
+          listMatchingRefs: vi.fn(async () => ({ data: [] }))
+        }
+      }
+    }
+    mockGetOctokit.mockReturnValue(mockOctokit as any)
+    Object.assign(mockGithubContext, {
+      eventName: 'pull_request',
+      repo: { owner: 'JasonEtco', repo: 'test' },
+      sha: '123abc',
+      payload: {
+        release: {
+          tag_name: 'v2.0.0',
+          draft: false,
+          prerelease: false
+        }
+      }
+    })
 
-    tools.context.event = 'pull_request'
-    process.env.INPUT_TAG_NAME = 'v2.0.0'
+    config.TAG_NAME = 'v2.0.0'
 
-    await buildAndTagAction(tools)
+    await main(config)
 
-    expect(nock.isDone()).toBe(true)
+    expect(mockOctokit.rest.git.createTree).toHaveBeenCalled()
+    expect(mockOctokit.rest.git.createCommit).toHaveBeenCalled()
+    expect(mockOctokit.rest.git.createRef).toHaveBeenCalledTimes(2)
   })
 })
