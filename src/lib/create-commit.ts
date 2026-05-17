@@ -55,16 +55,6 @@ export default async function createCommit(octokit: Octokit) {
     )
   }
 
-  // Add package.json if it exists
-  if (packageJsonContent) {
-    treeEntries.push({
-      path: 'package.json',
-      mode: '100644',
-      type: 'blob',
-      content: packageJsonContent
-    })
-  }
-
   // Add dist/package.json if it exists (optional)
   await addFileToTree(treeEntries, 'dist/package.json')
 
