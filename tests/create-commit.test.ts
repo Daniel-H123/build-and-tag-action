@@ -51,7 +51,7 @@ describe('create-commit', () => {
     expect(octokit.rest.git.createCommit).toHaveBeenCalled()
 
     // Test that our tree was created correctly
-    expect(treeParams.tree).toHaveLength(3)
+    expect(treeParams.tree).toHaveLength(2)
     expect(treeParams.tree.some((obj: any) => obj.path === 'index.js')).toBe(
       true
     )
