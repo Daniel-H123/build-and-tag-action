@@ -1,6 +1,6 @@
 {
   "name": "build-and-tag-action",
-  "version": "2.0.1",
+  "version": "3.0.0",
   "main": "dist/index.cjs",
   "scripts": {
     "test": "vitest",
