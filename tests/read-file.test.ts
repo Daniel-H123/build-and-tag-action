@@ -1,5 +1,9 @@
+import { describe, it, expect } from 'vitest'
 import path from 'path'
-import readFile from '../src/lib/read-file'
+import { fileURLToPath } from 'url'
+import readFile from '../src/lib/read-file.js'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 describe('read-file', () => {
   const baseDir = path.join(__dirname, 'fixtures')
@@ -10,7 +14,7 @@ describe('read-file', () => {
   })
 
   it('throws if the file does not exist', async () => {
-    await expect(readFile(baseDir, 'nope')).rejects.toThrowError(
+    await expect(readFile(baseDir, 'nope')).rejects.toThrow(
       'nope does not exist.'
     )
   })

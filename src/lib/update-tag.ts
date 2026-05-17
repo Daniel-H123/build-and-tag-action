@@ -1,15 +1,19 @@
-import { Toolkit } from 'actions-toolkit'
+import { context, getOctokit } from '@actions/github'
+import type { ActionConfig } from '../index.js'
+import { info } from '@actions/core'
 
 export default async function updateTag(
-  tools: Toolkit,
+  config: ActionConfig,
   sha: string,
   tagName: string
 ) {
+  const octokit = getOctokit(config.GITHUB_TOKEN)
+
   const ref = `tags/${tagName}`
 
-  tools.log.info(`Updating ${ref}`)
-  return tools.github.git.updateRef({
-    ...tools.context.repo,
+  info(`Updating ${ref}`)
+  return octokit.rest.git.updateRef({
+    ...context.repo,
     ref,
     force: true,
     sha

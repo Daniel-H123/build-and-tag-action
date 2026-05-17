@@ -1,42 +1,57 @@
-import { Toolkit } from 'actions-toolkit'
-import readFile from './read-file'
+import readFile from './read-file.js'
+import { context } from '@actions/github'
+import type { Octokit } from '../buildAndTagAction.js'
+import { info, setFailed } from '@actions/core'
 
-export default async function createCommit(tools: Toolkit) {
-  const { main } = tools.getPackageJSON<{ main?: string }>()
+export default async function createCommit(octokit: Octokit) {
+  let main = ''
+
+  const workspace = process.env.GITHUB_WORKSPACE
+
+  if (!workspace) {
+    throw new Error('GITHUB_WORKSPACE environment variable is not set.')
+  }
+
+  try {
+    main = JSON.parse(await readFile(workspace, 'package.json')).main as string
+  } catch (err) {
+    setFailed(`Failed to read package.json: ${err}`)
+  }
 
   if (!main) {
     throw new Error('Property "main" does not exist in your `package.json`.')
   }
 
-  tools.log.info('Creating tree')
-  const tree = await tools.github.git.createTree({
-    ...tools.context.repo,
+  info('Creating tree')
+
+  const tree = await octokit.rest.git.createTree({
+    ...context.repo,
     tree: [
       {
         path: 'action.yml',
         mode: '100644',
         type: 'blob',
-        content: await readFile(tools.workspace, 'action.yml')
+        content: await readFile(workspace, 'action.yml')
       },
       {
         path: main,
         mode: '100644',
         type: 'blob',
-        content: await readFile(tools.workspace, main)
+        content: await readFile(workspace, main)
       }
     ]
   })
 
-  tools.log.complete('Tree created')
+  info('Tree created')
 
-  tools.log.info('Creating commit')
-  const commit = await tools.github.git.createCommit({
-    ...tools.context.repo,
+  info('Creating commit')
+  const commit = await octokit.rest.git.createCommit({
+    ...context.repo,
     message: 'Automatic compilation',
     tree: tree.data.sha,
-    parents: [tools.context.sha]
+    parents: [context.sha]
   })
-  tools.log.complete('Commit created')
+  info('Commit created')
 
   return commit.data
 }

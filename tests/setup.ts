@@ -1,18 +1,24 @@
 import fs from 'fs'
 import path from 'path'
-import jsYaml from 'js-yaml'
+import { fileURLToPath } from 'url'
+import * as yaml from 'js-yaml'
+
+const __dirname = path.dirname(fileURLToPath(import.meta.url))
 
 /**
  * Helper that reads the `action.yml` and includes the default values
  * for each input as an environment variable, like the Actions runtime does.
  */
 function getDefaultValues() {
-  const yaml = fs.readFileSync(path.join(__dirname, '../action.yml'), 'utf8')
-  const { inputs } = jsYaml.safeLoad(yaml) as any
+  const yamlContent = fs.readFileSync(
+    path.join(__dirname, '../action.yml'),
+    'utf8'
+  )
+  const { inputs } = yaml.load(yamlContent) as any
   return Object.keys(inputs).reduce(
     (sum, key) => ({
       ...sum,
-      [key]: inputs[key].default
+      [`INPUT_${key.toUpperCase()}`]: inputs[key].default
     }),
     {}
   )
