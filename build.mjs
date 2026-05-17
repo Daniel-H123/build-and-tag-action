@@ -7,11 +7,6 @@ await esbuild.build({
   target: "node24",
   outfile: "dist/index.cjs",
 
-  external: [
-    "@actions/core",
-    "@actions/github"
-  ],
-
   format: "cjs",
   minify: true
 });
