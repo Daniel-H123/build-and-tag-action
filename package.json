@@ -1,14 +1,14 @@
 {
   "name": "build-and-tag-action",
   "version": "3.0.0",
-  "main": "dist/index.cjs",
+  "main": "dist/index.js",
   "scripts": {
     "test": "vitest",
     "test:coverage": "vitest --coverage",
     "coverage": "vitest --coverage --run",
     "format": "prettier --write \"src/**/*.{ts,js}\" \"tests/**/*.{ts,js}\"",
     "format:check": "prettier --check \"src/**/*.{ts,js}\" \"tests/**/*.{ts,js}\"",
-    "build": "ncc build src/index.ts -m && mv ./dist/index.js ./dist/index.mjs"
+    "build": "ncc build src/index.ts -m"
   },
   "type": "module",
   "dependencies": {
