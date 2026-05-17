@@ -1,6 +1,6 @@
 <h3 align="center">Build and Tag action v3</h3>
 
-<p align="center"><a href="https://github.com/Daniel-H123/build-and-tag-action"><img alt="GitHub Actions status" src="https://github.com/JasonEtco/build-and-tag-action/workflows/CI/badge.svg"></a> <a href="https://codecov.io/gh/Daniel-H123/build-and-tag-action/"><img src="https://badgen.now.sh/codecov/c/github/Daniel-H123/build-and-tag-action" alt="Codecov"></a></p>
+<p align="center"><a href="https://github.com/Daniel-H123/build-and-tag-action"><img alt="GitHub Actions status" src="https://github.com/Daniel-H123/build-and-tag-action/workflows/CI/badge.svg"></a> <a href="https://codecov.io/gh/Daniel-H123/build-and-tag-action/"><img src="https://badgen.now.sh/codecov/c/github/Daniel-H123/build-and-tag-action" alt="Codecov"></a></p>
 
 ---
 
