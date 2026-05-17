@@ -41,7 +41,7 @@ export default async function createCommit(octokit: Octokit) {
     ]
   })
 
-  octokit.log.complete('Tree created')
+  octokit.log.info('Tree created')
 
   octokit.log.info('Creating commit')
   const commit = await octokit.rest.git.createCommit({
@@ -50,7 +50,7 @@ export default async function createCommit(octokit: Octokit) {
     tree: tree.data.sha,
     parents: [context.sha]
   })
-  octokit.log.complete('Commit created')
+  octokit.log.info('Commit created')
 
   return commit.data
 }
