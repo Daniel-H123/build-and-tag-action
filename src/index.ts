@@ -8,8 +8,8 @@ export type ActionConfig = {
 
 try {
     const config: ActionConfig = {
-        GITHUB_TOKEN: core.getInput("githubToken", { required: true }),
-        TAG_NAME: core.getInput("tagName", { required: false }),
+        GITHUB_TOKEN: core.getInput("github_token", { required: true }),
+        TAG_NAME: core.getInput("tag_name", { required: false }),
     };
     
     main(config);
