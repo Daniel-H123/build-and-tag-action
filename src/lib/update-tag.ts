@@ -1,5 +1,6 @@
 import { context, getOctokit } from "@actions/github";
 import type { ActionConfig } from "../index.js"
+import { info } from "@actions/core";
 
 
 export default async function updateTag(
@@ -11,7 +12,7 @@ export default async function updateTag(
 
   const ref = `tags/${tagName}`
 
-  octokit.log.info(`Updating ${ref}`)
+ info(`Updating ${ref}`)
   return octokit.rest.git.updateRef({
     ...context.repo,
     ref,

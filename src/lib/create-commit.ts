@@ -1,6 +1,7 @@
 import readFile from './read-file.js'
 import { context } from "@actions/github";
 import type { Octokit } from "../main.js";
+import { info, setFailed } from '@actions/core';
 
 export default async function createCommit(octokit: Octokit) {
   let main = ''
@@ -14,14 +15,14 @@ export default async function createCommit(octokit: Octokit) {
   try {
     main = JSON.parse(await readFile(workspace, "package.json")).main as string;
   } catch (err) {
-    octokit.log.setFailed(`Failed to read package.json: ${err}`);
+    setFailed(`Failed to read package.json: ${err}`);
   }
 
   if (!main) {
     throw new Error('Property "main" does not exist in your `package.json`.')
   }
 
-  octokit.log.info('Creating tree')
+  info('Creating tree')
 
   const tree = await octokit.rest.git.createTree({
     ...context.repo,
@@ -41,16 +42,16 @@ export default async function createCommit(octokit: Octokit) {
     ]
   })
 
-  octokit.log.info('Tree created')
+  info('Tree created')
 
-  octokit.log.info('Creating commit')
+  info('Creating commit')
   const commit = await octokit.rest.git.createCommit({
     ...context.repo,
     message: 'Automatic compilation',
     tree: tree.data.sha,
     parents: [context.sha]
   })
-  octokit.log.info('Commit created')
+  info('Commit created')
 
   return commit.data
 }

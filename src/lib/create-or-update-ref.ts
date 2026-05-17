@@ -1,5 +1,6 @@
 import { context, getOctokit } from "@actions/github";
 import type { ActionConfig } from "../index.js"
+import { info } from "@actions/core";
 
 export default async function createOrUpdateRef(
   config: ActionConfig,
@@ -8,7 +9,7 @@ export default async function createOrUpdateRef(
 ) {
   const refName = `tags/v${tagName}`
   const octokit = getOctokit(config.GITHUB_TOKEN);
-  octokit.log.info(`Updating major version tag ${refName}`)
+  info(`Updating major version tag ${refName}`)
   const { data: matchingRefs } = await octokit.rest.git.listMatchingRefs({
     ...context.repo,
     ref: refName

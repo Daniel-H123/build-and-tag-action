@@ -5,6 +5,7 @@ import { context, getOctokit } from "@actions/github";
 import type { ActionConfig } from "./index.js";
 import createOrUpdateRef from "./lib/create-or-update-ref.js";
 import semver from 'semver'
+import { info } from "@actions/core";
 
 export type Octokit = ReturnType<typeof getOctokit>;
 
@@ -13,7 +14,7 @@ export default async function main(config: ActionConfig) {
 
     // Get the tag to update
     const tagName = getTagName(config)
-    octokit.log.info(`Updating tag [${tagName}]`)
+    info(`Updating tag [${tagName}]`)
 
     // Create a new commit, with the new tree
     const commit = await createCommit(octokit)
