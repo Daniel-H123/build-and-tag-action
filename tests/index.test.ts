@@ -1,5 +1,5 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
-import main from '../src/main.js'
+import main from '../src/buildAndTagAction.js'
 import { generateConfig } from './helpers.js'
 import type { ActionConfig } from '../src/index.js'
 import * as github from '@actions/github'

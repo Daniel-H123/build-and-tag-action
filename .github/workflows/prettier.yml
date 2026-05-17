@@ -1,4 +1,4 @@
-name: CI
+name: Prettier
 
 on:
   pull_request:
@@ -9,7 +9,7 @@ on:
       - main
 
 jobs:
-  build:
+  prettier:
     runs-on: ubuntu-latest
 
     steps:
@@ -20,9 +20,4 @@ jobs:
           node-version: 24
           cache: npm
       - run: npm ci
-      - run: npm run coverage
-      - name: Upload coverage to Codecov
-        uses: codecov/codecov-action@v6
-        with:
-          files: ./coverage/lcov.info
-          fail_ci_if_error: true
+      - run: npm run format:check

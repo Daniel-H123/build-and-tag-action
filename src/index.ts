@@ -1,5 +1,5 @@
 import * as core from '@actions/core'
-import main from './main.js'
+import buildAndTagAction from './buildAndTagAction.js'
 
 export type ActionConfig = {
   GITHUB_TOKEN: string
@@ -12,7 +12,7 @@ try {
     TAG_NAME: core.getInput('tag_name', { required: false })
   }
 
-  main(config)
+  buildAndTagAction(config)
 } catch (error: unknown) {
   if (error instanceof Error) {
     core.setFailed(error.message)

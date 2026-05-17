@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
 import createCommit from '../src/lib/create-commit.js'
-import type { Octokit } from '../src/main.js'
+import type { Octokit } from '../src/buildAndTagAction.js'
 import * as github from '@actions/github'
 
 vi.mock('@actions/github', async () => {

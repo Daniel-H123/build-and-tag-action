@@ -1,5 +1,5 @@
 import type { ActionConfig } from '../src/index.js'
-import type { Octokit } from '../src/main.js'
+import type { Octokit } from '../src/buildAndTagAction.js'
 
 export function generateConfig(): ActionConfig {
   return {

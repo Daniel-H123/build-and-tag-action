@@ -1,6 +1,6 @@
 import readFile from './read-file.js'
 import { context } from '@actions/github'
-import type { Octokit } from '../main.js'
+import type { Octokit } from '../buildAndTagAction.js'
 import { info, setFailed } from '@actions/core'
 
 export default async function createCommit(octokit: Octokit) {

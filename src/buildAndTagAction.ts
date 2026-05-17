@@ -9,7 +9,7 @@ import { info } from '@actions/core'
 
 export type Octokit = ReturnType<typeof getOctokit>
 
-export default async function main(config: ActionConfig) {
+export default async (config: ActionConfig) => {
   const octokit = getOctokit(config.GITHUB_TOKEN)
 
   // Get the tag to update
