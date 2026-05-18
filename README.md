@@ -1,13 +1,15 @@
 <h3 align="center">Build and Tag action v3</h3>
 
-<p align="center"><a href="https://github.com/Daniel-H123/build-and-tag-action"><img alt="GitHub Actions status" src="https://github.com/Daniel-H123/build-and-tag-action/workflows/CI/badge.svg"></a> <a href="https://codecov.io/gh/Daniel-H123/build-and-tag-action/"><img src="https://badgen.now.sh/codecov/c/github/Daniel-H123/build-and-tag-action" alt="Codecov"></a></p>
+<p align="center"><a href="https://github.com/Daniel-H123/build-and-tag-action"><img alt="GitHub Actions status" src="https://github.com/Daniel-H123/build-and-tag-action/workflows/CI/badge.svg"></a> <a href="https://codecov.io/gh/Daniel-H123/build-and-tag-action" > 
+ <img src="https://codecov.io/gh/Daniel-H123/build-and-tag-action/graph/badge.svg?token=ZDASN1622T"/> 
+ </a></p>
 
 ---
 
 A GitHub Action for publishing JavaScript Actions! It's designed to act on new releases, and updates the tag with a compiled JS file, using [`@vercel/ncc`](https://github.com/vercel/ncc). The process looks like this:
 
 - Reads the `main` property in your `package.json`
-- Force pushes `action.yml` and the above file to the release's tag
+- Force pushes `action.yml` or `action.yaml` and the above file to the release's tag
 - Force pushes to the major version tag (ex: `v1.0.0` -> `v1`)
 
 <img width="1005" alt="image" src="https://user-images.githubusercontent.com/10660468/82084147-d894ca00-96b8-11ea-9a14-1640d6963213.png">
@@ -61,6 +63,14 @@ Your `package.json` will probably contain a `dependencies` section, in addition 
 **tag_name**
 
 The tag to update. If the workflow event is `release`, it will use the `tag_name` from the event payload. This option can be useful when using this action in a workflow with other actions that generate a release:
+
+**github_token**
+
+The token used to authenticate Git pushes. It must have write permission, because the action pushes the release tag and major version tags.
+
+**commit_message**
+
+The commit message used when the action creates the compiled release commit. Set this if you want the generated commit to use a custom message.
 
 ```yaml
 - uses: fictional/releaser@v1 # Not a real action!

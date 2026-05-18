@@ -17,10 +17,10 @@ export default async (config: ActionConfig) => {
   info(`Updating tag [${tagName}]`)
 
   // Create a new commit, with the new tree
-  const commit = await createCommit(octokit)
+  const commit = await createCommit(octokit, config)
 
   // Update the tag to point to the new commit
-  await updateTag(config, commit.sha, tagName)
+  await updateTag(octokit, commit.sha, tagName)
 
   // Also update the major version tag.
   // For example, for version v1.0.0, we'd also update v1.
@@ -37,7 +37,7 @@ export default async (config: ActionConfig) => {
   if (shouldRewriteMajorAndMinorRef) {
     const majorStr = semver.major(tagName).toString()
     const minorStr = semver.minor(tagName).toString()
-    await createOrUpdateRef(config, commit.sha, `${majorStr}.${minorStr}`)
-    return createOrUpdateRef(config, commit.sha, majorStr)
+    await createOrUpdateRef(octokit, commit.sha, `${majorStr}.${minorStr}`)
+    return createOrUpdateRef(octokit, commit.sha, majorStr)
   }
 }

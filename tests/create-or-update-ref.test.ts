@@ -1,8 +1,6 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
 import createOrUpdateRef from '../src/lib/create-or-update-ref.js'
-import { generateConfig } from './helpers.js'
-import type { ActionConfig } from '../src/index.js'
-import * as github from '@actions/github'
+import { createMockOctokit } from './helpers.js'
 
 vi.mock('@actions/github', async () => {
   const actual = await vi.importActual('@actions/github')
@@ -11,40 +9,22 @@ vi.mock('@actions/github', async () => {
     context: {
       repo: { owner: 'JasonEtco', repo: 'test' }
     },
-    getOctokit: vi.fn((token) => ({
-      rest: {
-        git: {
-          updateRef: vi.fn(async () => ({})),
-          createRef: vi.fn(async () => ({})),
-          listMatchingRefs: vi.fn(async () => ({ data: [] }))
-        }
-      }
-    }))
+    getOctokit: vi.fn(() => createMockOctokit())
   }
 })
 
 describe('create-or-update-ref', () => {
-  let config: ActionConfig
-
   beforeEach(() => {
-    config = generateConfig()
     vi.clearAllMocks()
   })
 
   it('updates the major ref if it already exists', async () => {
-    const mockGetOctokit = vi.mocked(github.getOctokit)
-    const mockOctokit = {
-      rest: {
-        git: {
-          updateRef: vi.fn(async () => ({})),
-          createRef: vi.fn(async () => ({})),
-          listMatchingRefs: vi.fn(async () => ({ data: [{ ref: 'tags/v1' }] }))
-        }
-      }
-    }
-    mockGetOctokit.mockReturnValue(mockOctokit as any)
+    const mockOctokit = createMockOctokit() as any
+    mockOctokit.rest.git.listMatchingRefs.mockResolvedValueOnce({
+      data: [{ ref: 'tags/v1' }]
+    })
 
-    await createOrUpdateRef(config, '123abc', '1')
+    await createOrUpdateRef(mockOctokit, '123abc', '1')
 
     expect(mockOctokit.rest.git.listMatchingRefs).toHaveBeenCalledWith(
       expect.objectContaining({ ref: 'tags/v1' })
@@ -55,19 +35,10 @@ describe('create-or-update-ref', () => {
   })
 
   it('creates a new major ref if it does not already exist', async () => {
-    const mockGetOctokit = vi.mocked(github.getOctokit)
-    const mockOctokit = {
-      rest: {
-        git: {
-          updateRef: vi.fn(async () => ({})),
-          createRef: vi.fn(async () => ({})),
-          listMatchingRefs: vi.fn(async () => ({ data: [] }))
-        }
-      }
-    }
-    mockGetOctokit.mockReturnValue(mockOctokit as any)
+    const mockOctokit = createMockOctokit() as any
+    mockOctokit.rest.git.listMatchingRefs.mockResolvedValueOnce({ data: [] })
 
-    await createOrUpdateRef(config, '123abc', '1')
+    await createOrUpdateRef(mockOctokit, '123abc', '1')
 
     expect(mockOctokit.rest.git.listMatchingRefs).toHaveBeenCalledWith(
       expect.objectContaining({ ref: 'tags/v1' })
@@ -78,19 +49,10 @@ describe('create-or-update-ref', () => {
   })
 
   it('creates a new minor ref if it does not already exist', async () => {
-    const mockGetOctokit = vi.mocked(github.getOctokit)
-    const mockOctokit = {
-      rest: {
-        git: {
-          updateRef: vi.fn(async () => ({})),
-          createRef: vi.fn(async () => ({})),
-          listMatchingRefs: vi.fn(async () => ({ data: [] }))
-        }
-      }
-    }
-    mockGetOctokit.mockReturnValue(mockOctokit as any)
+    const mockOctokit = createMockOctokit() as any
+    mockOctokit.rest.git.listMatchingRefs.mockResolvedValueOnce({ data: [] })
 
-    await createOrUpdateRef(config, '123abc', '1.0')
+    await createOrUpdateRef(mockOctokit, '123abc', '1.0')
 
     expect(mockOctokit.rest.git.listMatchingRefs).toHaveBeenCalledWith(
       expect.objectContaining({ ref: 'tags/v1.0' })
