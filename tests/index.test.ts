@@ -1,6 +1,6 @@
 import { describe, it, beforeEach, expect, vi } from 'vitest'
 import main from '../src/buildAndTagAction.js'
-import { generateConfig } from './helpers.js'
+import { generateConfig, createMockOctokit } from './helpers.js'
 import type { ActionConfig } from '../src/index.js'
 import * as github from '@actions/github'
 
@@ -20,17 +20,7 @@ vi.mock('@actions/github', async () => {
         }
       }
     },
-    getOctokit: vi.fn((token) => ({
-      rest: {
-        git: {
-          createTree: vi.fn(async () => ({ data: { sha: 'tree123' } })),
-          createCommit: vi.fn(async () => ({ data: { sha: 'commit123' } })),
-          updateRef: vi.fn(async () => ({})),
-          createRef: vi.fn(async () => ({})),
-          listMatchingRefs: vi.fn(async () => ({ data: [] }))
-        }
-      }
-    }))
+    getOctokit: vi.fn(() => createMockOctokit())
   }
 })
 
@@ -41,25 +31,18 @@ describe('build-and-tag-action', () => {
     vi.clearAllMocks()
     config = generateConfig()
     process.env.GITHUB_WORKSPACE = 'tests/fixtures/workspace'
+    const mockGetOctokit = vi.mocked(github.getOctokit)
+    mockGetOctokit.mockReturnValue(createMockOctokit() as any)
   })
 
   it('updates the ref and updates an existing major ref', async () => {
     const mockGetOctokit = vi.mocked(github.getOctokit)
     const mockGithubContext = vi.mocked(github.context)
-    const mockOctokit = {
-      rest: {
-        git: {
-          createTree: vi.fn(async () => ({ data: { sha: 'tree123' } })),
-          createCommit: vi.fn(async () => ({ data: { sha: 'commit123' } })),
-          updateRef: vi.fn(async () => ({})),
-          createRef: vi.fn(async () => ({})),
-          listMatchingRefs: vi.fn(async () => ({
-            data: [{ ref: 'tags/v1' }, { ref: 'tags/v1.0' }]
-          }))
-        }
-      }
-    }
-    mockGetOctokit.mockReturnValue(mockOctokit as any)
+    const mockOctokit = createMockOctokit() as any
+    mockOctokit.rest.git.listMatchingRefs.mockResolvedValueOnce({
+      data: [{ ref: 'tags/v1' }, { ref: 'tags/v1.0' }]
+    })
+    mockGetOctokit.mockReturnValue(mockOctokit)
     Object.assign(mockGithubContext, {
       eventName: 'release',
       repo: { owner: 'JasonEtco', repo: 'test' },
@@ -83,18 +66,9 @@ describe('build-and-tag-action', () => {
   it('updates the ref and creates a new major & minor ref', async () => {
     const mockGetOctokit = vi.mocked(github.getOctokit)
     const mockGithubContext = vi.mocked(github.context)
-    const mockOctokit = {
-      rest: {
-        git: {
-          createTree: vi.fn(async () => ({ data: { sha: 'tree123' } })),
-          createCommit: vi.fn(async () => ({ data: { sha: 'commit123' } })),
-          updateRef: vi.fn(async () => ({})),
-          createRef: vi.fn(async () => ({})),
-          listMatchingRefs: vi.fn(async () => ({ data: [] }))
-        }
-      }
-    }
-    mockGetOctokit.mockReturnValue(mockOctokit as any)
+    const mockOctokit = createMockOctokit() as any
+    mockOctokit.rest.git.listMatchingRefs.mockResolvedValueOnce({ data: [] })
+    mockGetOctokit.mockReturnValue(mockOctokit)
     Object.assign(mockGithubContext, {
       eventName: 'release',
       repo: { owner: 'JasonEtco', repo: 'test' },
@@ -118,18 +92,9 @@ describe('build-and-tag-action', () => {
   it('does not update the major ref if the release is a draft', async () => {
     const mockGetOctokit = vi.mocked(github.getOctokit)
     const mockGithubContext = vi.mocked(github.context)
-    const mockOctokit = {
-      rest: {
-        git: {
-          createTree: vi.fn(async () => ({ data: { sha: 'tree123' } })),
-          createCommit: vi.fn(async () => ({ data: { sha: 'commit123' } })),
-          updateRef: vi.fn(async () => ({})),
-          createRef: vi.fn(async () => ({})),
-          listMatchingRefs: vi.fn(async () => ({ data: [] }))
-        }
-      }
-    }
-    mockGetOctokit.mockReturnValue(mockOctokit as any)
+    const mockOctokit = createMockOctokit() as any
+    mockOctokit.rest.git.listMatchingRefs.mockResolvedValueOnce({ data: [] })
+    mockGetOctokit.mockReturnValue(mockOctokit)
     Object.assign(mockGithubContext, {
       eventName: 'release',
       repo: { owner: 'JasonEtco', repo: 'test' },
@@ -153,18 +118,9 @@ describe('build-and-tag-action', () => {
   it('does not update the major ref if the release is a prerelease', async () => {
     const mockGetOctokit = vi.mocked(github.getOctokit)
     const mockGithubContext = vi.mocked(github.context)
-    const mockOctokit = {
-      rest: {
-        git: {
-          createTree: vi.fn(async () => ({ data: { sha: 'tree123' } })),
-          createCommit: vi.fn(async () => ({ data: { sha: 'commit123' } })),
-          updateRef: vi.fn(async () => ({})),
-          createRef: vi.fn(async () => ({})),
-          listMatchingRefs: vi.fn(async () => ({ data: [] }))
-        }
-      }
-    }
-    mockGetOctokit.mockReturnValue(mockOctokit as any)
+    const mockOctokit = createMockOctokit() as any
+    mockOctokit.rest.git.listMatchingRefs.mockResolvedValueOnce({ data: [] })
+    mockGetOctokit.mockReturnValue(mockOctokit)
     Object.assign(mockGithubContext, {
       eventName: 'release',
       repo: { owner: 'JasonEtco', repo: 'test' },
@@ -188,18 +144,9 @@ describe('build-and-tag-action', () => {
   it('updates the ref and creates a new major ref for an event other than `release`', async () => {
     const mockGetOctokit = vi.mocked(github.getOctokit)
     const mockGithubContext = vi.mocked(github.context)
-    const mockOctokit = {
-      rest: {
-        git: {
-          createTree: vi.fn(async () => ({ data: { sha: 'tree123' } })),
-          createCommit: vi.fn(async () => ({ data: { sha: 'commit123' } })),
-          updateRef: vi.fn(async () => ({})),
-          createRef: vi.fn(async () => ({})),
-          listMatchingRefs: vi.fn(async () => ({ data: [] }))
-        }
-      }
-    }
-    mockGetOctokit.mockReturnValue(mockOctokit as any)
+    const mockOctokit = createMockOctokit() as any
+    mockOctokit.rest.git.listMatchingRefs.mockResolvedValueOnce({ data: [] })
+    mockGetOctokit.mockReturnValue(mockOctokit)
     Object.assign(mockGithubContext, {
       eventName: 'pull_request',
       repo: { owner: 'JasonEtco', repo: 'test' },
