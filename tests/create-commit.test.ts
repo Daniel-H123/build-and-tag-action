@@ -29,14 +29,18 @@ describe('create-commit', () => {
     config = generateConfig({ COMMIT_MESSAGE: 'Commit message' })
 
     // capture params for assertions
-    ;(octokit.rest.git.createTree as any).mockImplementationOnce(async (params: any) => {
-      treeParams = params
-      return { data: { sha: 'tree123' } }
-    })
-    ;(octokit.rest.git.createCommit as any).mockImplementationOnce(async (params: any) => {
-      commitParams = params
-      return { data: { sha: 'commit123' } }
-    })
+    ;(octokit.rest.git.createTree as any).mockImplementationOnce(
+      async (params: any) => {
+        treeParams = params
+        return { data: { sha: 'tree123' } }
+      }
+    )
+    ;(octokit.rest.git.createCommit as any).mockImplementationOnce(
+      async (params: any) => {
+        commitParams = params
+        return { data: { sha: 'commit123' } }
+      }
+    )
 
     process.env.GITHUB_WORKSPACE = 'tests/fixtures/workspace'
   })
@@ -49,9 +53,15 @@ describe('create-commit', () => {
 
     // Test that our tree was created correctly (action.yml, package.json, main)
     expect(treeParams.tree).toHaveLength(3)
-    expect(treeParams.tree.some((obj: any) => obj.path === 'index.js')).toBe(true)
-    expect(treeParams.tree.some((obj: any) => obj.path === 'dist/package.json')).toBe(true)
-    expect(treeParams.tree.some((obj: any) => obj.path === 'action.yml')).toBe(true)
+    expect(treeParams.tree.some((obj: any) => obj.path === 'index.js')).toBe(
+      true
+    )
+    expect(
+      treeParams.tree.some((obj: any) => obj.path === 'dist/package.json')
+    ).toBe(true)
+    expect(treeParams.tree.some((obj: any) => obj.path === 'action.yml')).toBe(
+      true
+    )
 
     // Test that our commit was created correctly
     expect(commitParams.message).toBe('Commit message')

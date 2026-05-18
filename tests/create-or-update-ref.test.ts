@@ -20,7 +20,9 @@ describe('create-or-update-ref', () => {
 
   it('updates the major ref if it already exists', async () => {
     const mockOctokit = createMockOctokit() as any
-    mockOctokit.rest.git.listMatchingRefs.mockResolvedValueOnce({ data: [{ ref: 'tags/v1' }] })
+    mockOctokit.rest.git.listMatchingRefs.mockResolvedValueOnce({
+      data: [{ ref: 'tags/v1' }]
+    })
 
     await createOrUpdateRef(mockOctokit, '123abc', '1')
 
