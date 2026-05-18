@@ -22,7 +22,7 @@ describe('update-tag', () => {
 
   it('updates the tag', async () => {
     const mockOctokit = createMockOctokit() as any
-    mockOctokit.rest.git.updateRef.mockImplementationOnce(async (p) => {
+    mockOctokit.rest.git.updateRef.mockImplementationOnce(async (p: any) => {
       params = p
       return {}
     })

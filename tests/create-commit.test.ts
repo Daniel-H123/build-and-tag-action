@@ -3,6 +3,9 @@ import createCommit from '../src/lib/create-commit.js'
 import type { Octokit } from '../src/buildAndTagAction.js'
 import { generateConfig, createMockOctokit } from './helpers.js'
 import type { ActionConfig } from '../src/index.js'
+import fs from 'fs'
+import os from 'os'
+import path from 'path'
 
 vi.mock('@actions/github', async () => {
   const actual = await vi.importActual('@actions/github')
@@ -82,5 +85,52 @@ describe('create-commit', () => {
     await expect(createCommit(octokit, config)).rejects.toThrow(
       'GITHUB_WORKSPACE environment variable is not set.'
     )
+  })
+
+  it('throws when package.json does not define main', async () => {
+    const workspace = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'build-and-tag-action-')
+    )
+    fs.writeFileSync(path.join(workspace, 'action.yml'), 'name: test\n')
+    fs.writeFileSync(path.join(workspace, 'package.json'), '{}')
+    process.env.GITHUB_WORKSPACE = workspace
+
+    await expect(createCommit(octokit, config)).rejects.toThrow(
+      'Property "main" does not exist in package.json.'
+    )
+  })
+
+  it('falls back to action.yaml when action.yml is missing', async () => {
+    const workspace = fs.mkdtempSync(
+      path.join(os.tmpdir(), 'build-and-tag-action-')
+    )
+    fs.writeFileSync(path.join(workspace, 'action.yaml'), 'name: test\n')
+    fs.writeFileSync(
+      path.join(workspace, 'package.json'),
+      '{"main":"dist/index.js"}'
+    )
+    fs.mkdirSync(path.join(workspace, 'dist'))
+    fs.writeFileSync(
+      path.join(workspace, 'dist/package.json'),
+      '{"type":"module"}'
+    )
+    fs.writeFileSync(
+      path.join(workspace, 'dist/index.js'),
+      'console.log("test")\n'
+    )
+    process.env.GITHUB_WORKSPACE = workspace
+
+    await createCommit(octokit, config)
+
+    expect(treeParams.tree).toHaveLength(3)
+    expect(treeParams.tree.some((obj: any) => obj.path === 'action.yaml')).toBe(
+      true
+    )
+    expect(
+      treeParams.tree.some((obj: any) => obj.path === 'dist/package.json')
+    ).toBe(true)
+    expect(
+      treeParams.tree.some((obj: any) => obj.path === 'dist/index.js')
+    ).toBe(true)
   })
 })
