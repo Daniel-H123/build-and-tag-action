@@ -17,7 +17,7 @@ export default async (config: ActionConfig) => {
   info(`Updating tag [${tagName}]`)
 
   // Create a new commit, with the new tree
-  const commit = await createCommit(octokit)
+  const commit = await createCommit(octokit, config)
 
   // Update the tag to point to the new commit
   await updateTag(octokit, commit.sha, tagName)

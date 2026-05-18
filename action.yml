@@ -1,4 +1,4 @@
-name: Build and Tag
+name: Build and Tag v3
 description: Properly tags your GitHub Action
 runs:
   using: node24
@@ -11,3 +11,5 @@ inputs:
     description: The tag to update. If the workflow event is `release`, it will use the `tag_name` from the event payload.
   github_token:
     description: The GitHub token to authenticate API requests. If the workflow event is `release`, it will use the `GITHUB_TOKEN` secret.
+  commit_message:
+    description: The commit message to use when creating the commit. Defaults to "Automatic compilation".

@@ -2,8 +2,9 @@ import readFile from './read-file.js'
 import { context } from '@actions/github'
 import type { Octokit } from '../buildAndTagAction.js'
 import { info } from '@actions/core'
+import type { ActionConfig } from '../index.js'
 
-export default async function createCommit(octokit: Octokit) {
+export default async function createCommit(octokit: Octokit, config: ActionConfig) {
   const workspace = process.env.GITHUB_WORKSPACE
 
   if (!workspace) {
@@ -76,7 +77,7 @@ export default async function createCommit(octokit: Octokit) {
   info('Creating commit')
   const commit = await octokit.rest.git.createCommit({
     ...context.repo,
-    message: 'Automatic compilation',
+    message: config.COMMIT_MESSAGE,
     tree: tree.data.sha,
     parents: [context.sha]
   })
