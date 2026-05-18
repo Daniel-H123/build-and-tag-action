@@ -1,14 +1,12 @@
-import { context, getOctokit } from '@actions/github'
-import type { ActionConfig } from '../index.js'
+import { context } from '@actions/github'
 import { info } from '@actions/core'
+import type { Octokit } from '../buildAndTagAction.js'
 
 export default async function updateTag(
-  config: ActionConfig,
+  octokit: Octokit,
   sha: string,
   tagName: string
 ) {
-  const octokit = getOctokit(config.GITHUB_TOKEN)
-
   const ref = `tags/${tagName}`
 
   info(`Updating ${ref}`)

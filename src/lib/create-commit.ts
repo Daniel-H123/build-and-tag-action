@@ -1,7 +1,7 @@
 import readFile from './read-file.js'
 import { context } from '@actions/github'
 import type { Octokit } from '../buildAndTagAction.js'
-import { info, setFailed } from '@actions/core'
+import { info } from '@actions/core'
 
 export default async function createCommit(octokit: Octokit) {
   const workspace = process.env.GITHUB_WORKSPACE
